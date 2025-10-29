@@ -112,25 +112,6 @@ Key configuration notes
 
 ---
 
-## Development notes
-
-- To change the mapping between ConRO recommendations and physical keys:
-  1. Update the color→index table in `ConRO_Skills.lua` or keep it and change the AutoIt mapping.
-  2. Update `RotationSender.au3` so the script knows which RGB corresponds to which index and which key to press for that index.
-
-- To port the sender off Windows:
-  - Consider writing a small Python utility that uses pillow to sample a screen region and pyautogui or pynput to send keystrokes. That will make cross-platform testing possible on macOS.
-
----
-
-## Future work and ideas
-
-- Add a small calibration utility that captures the exact pixel coordinates from the running WoW client and stores them in a config file.
-- Use an IPC channel (e.g., a named pipe or a local web socket) to let an external program receive ConRO recommendations directly from the WoW client (requires more invasive changes and may be blocked by the game environment).
-- Implement a robust color-matching algorithm that tolerates color shifting and varying UI rendering.
-
----
-
 ## Attribution and licenses
 
 - `ConRO` addon (recommendation engine) — see https://www.curseforge.com/wow/addons/conro for project and license information. This repo expects ConRO to be installed separately.
@@ -138,11 +119,3 @@ Key configuration notes
 - `RotationSender.au3` relies on AutoIt (https://www.autoitscript.com/site/). AutoIt is provided under its own license.
 
 This repository does not include ConRO itself.
-
----
-
-If you want, I can:
-- Add a quick calibration helper (Lua + small config) to print the absolute screen coordinates where the pixels are drawn.
-- Port the AutoIt `RotationSender` to a cross-platform Python script so you can run the sender on macOS.
-
-If you want any of those, tell me which and I'll implement it next.
