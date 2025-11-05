@@ -17,11 +17,11 @@ The system is split into three cooperating components:
 
 2. `ConRO_Skills` (WoW addon in this repo)
    - This small addon converts ConRO's numeric recommendations into a set of tiny on-screen colored "pixels" (5x5 frames) placed in a fixed location inside the WoW client. Each pixel/frame represents a single recommendation slot and is colored according to ConRO's numeric output.
-   - Files in this repo: `Addon/ConRO_Skills/ConRO_Skills.lua`, `Addon/ConRO_Skills/ConRO_Skills.toc`. The addon reads ConRO windows and maps recommendation numbers (0–9) to RGB colors.
+   - Files in this repo: `Addon/ConRO_Skills/ConRO_Skills.lua`, `Addon/ConRO_Skills/ConRO_Skills.toc`. The addon reads ConRO windows and maps recommendation numbers (0–35, covering keys 0–9 and A–Z) to RGB colors.
 
 3. `RotationSender.au3` (AutoIt script)
    - An AutoIt script (Windows-only) that continuously samples the pixel locations produced by the `ConRO_Skills` addon, converts sampled colors back to recommendation indices and sends corresponding keyboard input to the WoW client to trigger the chosen spell.
-   - Important: the actual action indices (which are represented as numbers 0..9 by ConRO and mapped to colors by `ConRO_Skills`) come from ConRO itself — they are not user-configurable inside the sender. Instead, `RotationSender.au3` provides a GUI that controls which categories of ConRO proposals it will act on (for example: enable/disable Interrupts, Purges/Dispels, Defensive actions, or Attack/Rotation). The GUI also exposes timing controls (reaction delay, random % for that delay, keypress duration and its random %, and an absolute minimum delay between keys) so you can tune behaviour and add non-determinism to the timings.
+   - Important: the actual action indices (which are represented as numbers 0..35 by ConRO and mapped to colors by `ConRO_Skills`) come from ConRO itself — they are not user-configurable inside the sender. Instead, `RotationSender.au3` provides a GUI that controls which categories of ConRO proposals it will act on (for example: enable/disable Interrupts, Purges/Dispels, Defensive actions, or Attack/Rotation). The GUI also exposes timing controls (reaction delay, random % for that delay, keypress duration and its random %, and an absolute minimum delay between keys) so you can tune behaviour and add non-determinism to the timings.
    - File in this repo: `AutoIt/RotationSender.au3`.
 
 The chain is: ConRO -> ConRO_Skills (pixels) -> external pixel reader (AutoIt) -> simulated keypresses.
@@ -30,7 +30,7 @@ The chain is: ConRO -> ConRO_Skills (pixels) -> external pixel reader (AutoIt) -
 
 ## How it works (detailed dataflow)
 
-1. ConRO evaluates player state and writes a small numeric value (0–9) to its visible recommendation windows.
+1. ConRO evaluates player state and writes a small numeric value (0–35) to its visible recommendation windows.
 2. `ConRO_Skills` inspects ConRO's windows and places tiny frames/textures (pixels) in a fixed location on the screen. Each pixel's vertex color encodes a numeric recommendation using a pre-defined color table.
 3. The external script samples the screen pixels at the known coordinates and decodes the RGB color back into the numeric recommendation.
 4. Based on the decoded recommendation, the external script sends a mapped keyboard key (or macro) to the WoW client to cast the corresponding spell.
@@ -90,7 +90,7 @@ This approach keeps the in-game addon legal (it only displays colors), while the
     - Absolute min between keys: hard limit (ms) preventing keys from being sent too rapidly.
 
 Key configuration notes
-- The Lua addon uses an internal color table (10 colors for values 0–9). The AutoIt script must use the same table (or a tolerancing matching strategy) to map sampled RGB back to the numeric value.
+- The Lua addon uses an internal color table (36 colors for values 0–35, mapping to keys 0–9 and A–Z). The addon will accept either digits or single letters from ConRO's frames, translating letters back to indices so the AutoIt script can mirror the same table when decoding colors.
 - The Lua code includes a status pixel that will be colored to reflect whether the player is casting, channeling, on GCD, or idle. The sender uses this to avoid interrupting animations or sending keys during the GCD.
 
 ---

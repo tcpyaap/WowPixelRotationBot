@@ -23,18 +23,45 @@ local CONFIG = {
     START_Y = 0,            -- Starting Y position
 }
 
--- Color mapping for rotation values (0-9)
+-- Color mapping for rotation values (0-35).
+-- 0-9 retain the legacy palette, 10-35 map to virtual keys A-Z.
 local COLORS = {
-    {1, 0, 0},       -- 0: Red
-    {0, 1, 0},       -- 1: Green
-    {0, 0, 1},       -- 2: Blue
-    {1, 1, 0},       -- 3: Yellow
-    {1, 0, 1},       -- 4: Magenta
-    {0, 1, 1},       -- 5: Cyan
-    {0.5, 0.5, 0.5}, -- 6: Gray
-    {1, 0.5, 0},     -- 7: Orange
-    {0, 1, 0.5},     -- 8: Turquoise
-    {0.5, 0, 1}      -- 9: Purple
+    {1, 0, 0},         -- 0: Red
+    {0, 1, 0},         -- 1: Green
+    {0, 0, 1},         -- 2: Blue
+    {1, 1, 0},         -- 3: Yellow
+    {1, 0, 1},         -- 4: Magenta
+    {0, 1, 1},         -- 5: Cyan
+    {0.5, 0.5, 0.5},   -- 6: Gray
+    {1, 0.5, 0},       -- 7: Orange
+    {0, 1, 0.5},       -- 8: Turquoise
+    {0.5, 0, 1},       -- 9: Purple
+    {0.4118, 0.1490, 1.0000}, -- 10 (A): Violet Blue
+    {0.1490, 1.0000, 0.1647}, -- 11 (B): Bright Green
+    {1.0000, 0.1490, 0.3843}, -- 12 (C): Cerise
+    {0.1490, 0.6314, 1.0000}, -- 13 (D): Azure
+    {0.8784, 1.0000, 0.1490}, -- 14 (E): Lime Yellow
+    {0.8706, 0.1490, 1.0000}, -- 15 (F): Vivid Violet
+    {0.1490, 1.0000, 0.6235}, -- 16 (G): Spring Green
+    {1.0000, 0.3765, 0.1490}, -- 17 (H): Orange Red
+    {0.1490, 0.1725, 1.0000}, -- 18 (I): Indigo
+    {0.4196, 1.0000, 0.1490}, -- 19 (J): Lime Punch
+    {1.0000, 0.1490, 0.6667}, -- 20 (K): Hot Pink
+    {0.1490, 0.9176, 1.0000}, -- 21 (L): Capri
+    {1.0000, 0.8353, 0.1490}, -- 22 (M): Amber
+    {0.5882, 0.1490, 1.0000}, -- 23 (N): Electric Purple
+    {0.1490, 1.0000, 0.3412}, -- 24 (O): Emerald
+    {1.0000, 0.1490, 0.2078}, -- 25 (P): Fiery Red
+    {0.1490, 0.4549, 1.0000}, -- 26 (Q): Royal Blue
+    {0.7059, 1.0000, 0.1490}, -- 27 (R): Chartreuse
+    {1.0000, 0.1490, 0.9529}, -- 28 (S): Fuchsia
+    {0.1490, 1.0000, 0.8000}, -- 29 (T): Aquamarine
+    {1.0000, 0.5529, 0.1490}, -- 30 (U): Tangerine
+    {0.3020, 0.1490, 1.0000}, -- 31 (V): Electric Indigo
+    {0.2431, 1.0000, 0.1490}, -- 32 (W): Neon Green
+    {1.0000, 0.1490, 0.4941}, -- 33 (X): Wild Strawberry
+    {0.1490, 0.7412, 1.0000}, -- 34 (Y): Vivid Sky Blue
+    {0.9882, 1.0000, 0.1490}, -- 35 (Z): Lemon
 }
 
 -- Frame configuration: {ConROWindow, frameName, yOffset}
@@ -97,17 +124,40 @@ local function CreatePixelFrame(frameName, yOffset, isStatusFrame)
 end
 
 -- Function to update a rotation frame color based on ConRO window
+local function DecodeRotationValue(text)
+    if not text then
+        return nil
+    end
+
+    text = text:match("^%s*(.-)%s*$")
+    if text == "" then
+        return nil
+    end
+
+    local number = tonumber(text)
+    if number then
+        return number
+    end
+
+    if #text == 1 then
+        local byte = string.byte(text:upper())
+        local a = string.byte("A")
+        local z = string.byte("Z")
+        if byte and byte >= a and byte <= z then
+            return 10 + (byte - a)
+        end
+    end
+
+    return nil
+end
+
 local function UpdateRotationFrame(texture, conroWindow)
     if conroWindow and conroWindow.fontkey and conroWindow.fontkey:IsVisible() then
         local text = conroWindow.fontkey:GetText()
-        if text then
-            local number = tonumber(text)
-            if number and COLORS[number + 1] then
-                local r, g, b = unpack(COLORS[number + 1])
-                texture:SetVertexColor(r, g, b, 1)
-            else
-                texture:SetVertexColor(1, 1, 1, 1)  -- Default to white
-            end
+        local index = DecodeRotationValue(text)
+        if index and COLORS[index + 1] then
+            local r, g, b = unpack(COLORS[index + 1])
+            texture:SetVertexColor(r, g, b, 1)
         else
             texture:SetVertexColor(1, 1, 1, 1)  -- Default to white
         end
