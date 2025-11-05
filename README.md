@@ -90,7 +90,7 @@ This approach keeps the in-game addon legal (it only displays colors), while the
     - Absolute min between keys: hard limit (ms) preventing keys from being sent too rapidly.
 
 Key configuration notes
-- The Lua addon uses an internal color table (36 colors for values 0–35, mapping to keys 0–9 and A–Z). The AutoIt script must use the same table (or a tolerancing matching strategy) to map sampled RGB back to the numeric value.
+- The Lua addon uses an internal color table (36 colors for values 0–35, mapping to keys 0–9 and A–Z). The addon will accept either digits or single letters from ConRO's frames, translating letters back to indices so the AutoIt script can mirror the same table when decoding colors.
 - The Lua code includes a status pixel that will be colored to reflect whether the player is casting, channeling, on GCD, or idle. The sender uses this to avoid interrupting animations or sending keys during the GCD.
 
 ---

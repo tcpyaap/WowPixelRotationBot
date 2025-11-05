@@ -124,17 +124,40 @@ local function CreatePixelFrame(frameName, yOffset, isStatusFrame)
 end
 
 -- Function to update a rotation frame color based on ConRO window
+local function DecodeRotationValue(text)
+    if not text then
+        return nil
+    end
+
+    text = text:match("^%s*(.-)%s*$")
+    if text == "" then
+        return nil
+    end
+
+    local number = tonumber(text)
+    if number then
+        return number
+    end
+
+    if #text == 1 then
+        local byte = string.byte(text:upper())
+        local a = string.byte("A")
+        local z = string.byte("Z")
+        if byte and byte >= a and byte <= z then
+            return 10 + (byte - a)
+        end
+    end
+
+    return nil
+end
+
 local function UpdateRotationFrame(texture, conroWindow)
     if conroWindow and conroWindow.fontkey and conroWindow.fontkey:IsVisible() then
         local text = conroWindow.fontkey:GetText()
-        if text then
-            local number = tonumber(text)
-            if number and COLORS[number + 1] then
-                local r, g, b = unpack(COLORS[number + 1])
-                texture:SetVertexColor(r, g, b, 1)
-            else
-                texture:SetVertexColor(1, 1, 1, 1)  -- Default to white
-            end
+        local index = DecodeRotationValue(text)
+        if index and COLORS[index + 1] then
+            local r, g, b = unpack(COLORS[index + 1])
+            texture:SetVertexColor(r, g, b, 1)
         else
             texture:SetVertexColor(1, 1, 1, 1)  -- Default to white
         end
