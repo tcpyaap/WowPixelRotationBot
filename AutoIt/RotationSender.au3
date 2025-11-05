@@ -3,7 +3,7 @@
 ; Monitors ConRO color pixels and sends corresponding keystrokes
 ;
 ; NOTE (behavior summary):
-; - The numeric recommendations (0..9) and therefore the mapped actions/keys
+; - The numeric recommendations (0..35) and therefore the mapped actions/keys
 ;   are produced by the ConRO addon. This script DECODES ConRO's color pixels
 ;   back into numeric indices and treats those indices as action identifiers.
 ;   There is no direct GUI setting to change the underlying index->action
@@ -44,7 +44,8 @@ Global Const $PIXEL_POSITIONS[6][3] = [ _
 ]
 
 ; Color mapping (ConRO rotation value -> RGB hex -> Key)
-Global Const $COLOR_MAP[10][2] = [ _
+; 0-9 keep the historical colors, 10-35 map to virtual keys A-Z.
+Global Const $COLOR_MAP[36][2] = [ _
     ["FF0000", "0"], _ ; Red -> 0
     ["00FF00", "1"], _ ; Green -> 1
     ["0000FF", "2"], _ ; Blue -> 2
@@ -54,7 +55,33 @@ Global Const $COLOR_MAP[10][2] = [ _
     ["808080", "6"], _ ; Gray -> 6
     ["FF8000", "7"], _ ; Orange -> 7
     ["00FF80", "8"], _ ; Turquoise -> 8
-    ["8000FF", "9"] _  ; Purple -> 9
+    ["8000FF", "9"], _ ; Purple -> 9
+    ["6926FF", "A"], _ ; Violet Blue -> A
+    ["26FF2A", "B"], _ ; Bright Green -> B
+    ["FF2662", "C"], _ ; Cerise -> C
+    ["26A1FF", "D"], _ ; Azure -> D
+    ["E0FF26", "E"], _ ; Lime Yellow -> E
+    ["DE26FF", "F"], _ ; Vivid Violet -> F
+    ["26FF9F", "G"], _ ; Spring Green -> G
+    ["FF6026", "H"], _ ; Orange Red -> H
+    ["262CFF", "I"], _ ; Indigo -> I
+    ["6BFF26", "J"], _ ; Lime Punch -> J
+    ["FF26AA", "K"], _ ; Hot Pink -> K
+    ["26EAFF", "L"], _ ; Capri -> L
+    ["FFD526", "M"], _ ; Amber -> M
+    ["9626FF", "N"], _ ; Electric Purple -> N
+    ["26FF57", "O"], _ ; Emerald -> O
+    ["FF2635", "P"], _ ; Fiery Red -> P
+    ["2674FF", "Q"], _ ; Royal Blue -> Q
+    ["B4FF26", "R"], _ ; Chartreuse -> R
+    ["FF26F3", "S"], _ ; Fuchsia -> S
+    ["26FFCC", "T"], _ ; Aquamarine -> T
+    ["FF8D26", "U"], _ ; Tangerine -> U
+    ["4D26FF", "V"], _ ; Electric Indigo -> V
+    ["3EFF26", "W"], _ ; Neon Green -> W
+    ["FF267E", "X"], _ ; Wild Strawberry -> X
+    ["26BDFF", "Y"], _ ; Vivid Sky Blue -> Y
+    ["FCFF26", "Z"]   ; Lemon -> Z
 ]
 
 ; Status frame color mapping (from ConRO_Port.lua)
@@ -508,8 +535,10 @@ Func _SendKeyDLL($sKey)
     
     ; Convert key to virtual key code
     Local $iVirtualKey
+    $sKey = StringUpper($sKey)
+
     Switch $sKey
-        Case "0" To "9"
+        Case "0" To "9", "A" To "Z"
             $iVirtualKey = Asc($sKey)
         Case Else
             Return False ; Unsupported key
